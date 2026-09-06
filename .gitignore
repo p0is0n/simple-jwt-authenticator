@@ -1,0 +1,38 @@
+# Binaries
+/server
+/cli
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.out
+
+# Go build cache
+bin/
+dist/
+
+# Local environment
+.env
+.envbuild
+.env.local
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/launch.json
+*.code-workspace
+
+# Secrets: never commit real key material or tokens.
+secrets/*
+!secrets/.gitkeep
+*.pem
+*.key
+jwt-private.pem
+jwt-public.pem
+config/config.local.yaml
+config/config.yaml
+
+# Testcontainers / integration scratch
+tests/integration/.scratch/

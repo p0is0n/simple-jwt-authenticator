@@ -1,0 +1,113 @@
+# Configuration for simple-jwt-authenticator CLI mode.
+#
+# Settings with defaults are commented out and may be omitted.
+#
+# Key material and JWT trust policy are security-sensitive and must be
+# configured explicitly according to the CLI operation being used.
+
+jwt:
+  # JWT signature algorithm used for verification and token generation.
+  #
+  # Default: RS256
+  #
+  # algorithm: "RS256"
+
+  # PEM-encoded public key used to verify JWT signatures.
+  #
+  # Default: none
+  #
+  # Used by:
+  # - token validate
+  # - config validate
+  #
+  # Exactly one public verification key source must be configured:
+  # - public_key_pem
+  # - public_key_file
+  #
+  # public_key_pem: |
+  #   -----BEGIN PUBLIC KEY-----
+  #   ...
+  #   -----END PUBLIC KEY-----
+
+  # Path to a PEM-encoded public key used to verify JWT signatures.
+  #
+  # Default: none
+  #
+  # Exactly one public verification key source must be configured.
+  #
+  public_key_file: "/run/secrets/jwt-public.pem"
+
+  # PEM-encoded private key used to sign generated JWTs.
+  #
+  # Default: none
+  #
+  # Used by:
+  # - token generate
+  # - config validate
+  #
+  # Exactly one private signing key source must be configured:
+  # - private_key_pem
+  # - private_key_file
+  #
+  # Private signing material must never be exposed to the HTTP server.
+  #
+  # private_key_pem: |
+  #   -----BEGIN PRIVATE KEY-----
+  #   ...
+  #   -----END PRIVATE KEY-----
+
+  # Path to a PEM-encoded private key used to sign generated JWTs.
+  #
+  # Default: none
+  #
+  # Exactly one private signing key source must be configured when token
+  # generation is used.
+  #
+  private_key_file: "/run/secrets/jwt-private.pem"
+
+  # JWT issuer ("iss" claim).
+  #
+  # Default: none
+  # Required: yes
+  #
+  # For token generation, this value is written to the generated token.
+  #
+  # For token validation, tokens whose "iss" claim does not match this value
+  # are rejected.
+  #
+  issuer: "https://auth.example.com"
+
+  # Accepted JWT audiences ("aud" claim) used during token validation.
+  #
+  # Default: none
+  # A token must contain an audience accepted by this configuration.
+  #
+  # audience:
+  #   - "internal-services"
+
+  # Allowed time difference between the token issuer and validator.
+  #
+  # Default: 30s
+  #
+  # Used when validating time-based JWT claims such as exp, nbf, and iat.
+  #
+  # Keep this value as small as operationally practical.
+  #
+  # clock_skew: 30s
+
+  # Default lifetime of generated JWTs when --ttl is not specified.
+  #
+  # Default: 1h
+  #
+  # Generated JWTs always contain an expiration time.
+  #
+  # default_ttl: 1h
+
+  # Maximum lifetime allowed for generated JWTs.
+  #
+  # Default: 168h
+  # Equivalent to: 7 days
+  #
+  # Explicit --ttl values greater than this limit are rejected.
+  #
+  # max_ttl: 168h

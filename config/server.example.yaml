@@ -1,0 +1,224 @@
+# Configuration for simple-jwt-authenticator server mode.
+#
+# Settings with defaults are commented out and may be omitted.
+# Uncomment them only when the default value needs to be overridden.
+#
+# JWT verification key, issuer, and audience have no defaults and must be
+# configured explicitly.
+
+# JWT verification configuration.
+jwt:
+  # JWT signature algorithm accepted by the authenticator.
+  #
+  # Default: RS256
+  #
+  # algorithm: "RS256"
+
+  # PEM-encoded public verification key.
+  #
+  # Default: none
+  #
+  # Exactly one verification key source must be configured:
+  # - public_key_pem
+  # - public_key_file
+  #
+  # Never configure a private signing key here.
+  #
+  # public_key_pem: |
+  #   -----BEGIN PUBLIC KEY-----
+  #   ...
+  #   -----END PUBLIC KEY-----
+
+  # Path to a PEM-encoded public verification key.
+  #
+  # Default: none
+  #
+  # Exactly one verification key source must be configured.
+  #
+  public_key_file: "/run/secrets/jwt-public.pem"
+
+  # Expected JWT issuer ("iss" claim).
+  #
+  # Default: none
+  # Required: yes
+  #
+  issuer: "https://auth.example.com"
+
+  # Accepted JWT audiences ("aud" claim).
+  #
+  # Default: none
+  #
+  # audience:
+  #   - "internal-services"
+
+  # Allowed clock difference between the token issuer and authenticator.
+  #
+  # Default: 30s
+  #
+  # Keep this value as small as operationally practical because clock skew
+  # extends the effective acceptance window around time-based JWT claims.
+  #
+  # clock_skew: 30s
+
+
+# Authentication configuration.
+#
+# Authentication handlers and credential extractors have safe defaults.
+#
+# auth:
+  # Authentication handlers exposed by the server.
+  #
+  # handlers:
+    # HTTP authentication handlers.
+    #
+    # http:
+      # Nginx auth_request integration.
+      #
+      # nginx:
+        # Enables the Nginx authentication handler.
+        #
+        # Default: true
+        #
+        # enabled: true
+
+  # Credential extractors used to obtain JWT credentials from incoming
+  # authentication requests.
+  #
+  # extractors:
+    # HTTP credential extractors.
+    #
+    # http:
+      # Bearer token extraction from the Authorization header.
+      #
+      # authorization_header:
+        # Enables Authorization header credential extraction.
+        #
+        # Default: true
+        #
+        # Expected request format:
+        # Authorization: Bearer <token>
+        #
+        # enabled: true
+
+      # JWT extraction from an HTTP cookie.
+      #
+      # cookie:
+        # Enables cookie credential extraction.
+        #
+        # Default: false
+        #
+        # Cookie authentication is disabled by default because enabling it
+        # expands the accepted credential transport surface.
+        #
+        # enabled: false
+
+        # Name of the cookie containing the JWT.
+        #
+        # Default: none
+        # Required when cookie extraction is enabled.
+        #
+        # name: "auth_token"
+
+
+# Prometheus metrics configuration.
+#
+# metrics:
+  # Enables the Prometheus metrics endpoint.
+  #
+  # Default: false
+  #
+  # Protect this endpoint at the network or reverse-proxy layer when enabled.
+  #
+  # enabled: false
+
+  # HTTP path of the Prometheus metrics endpoint.
+  #
+  # Default: /metrics
+  #
+  # The path must be an absolute canonical HTTP path and must not conflict
+  # with reserved application routes.
+  #
+  # path: "/metrics"
+
+
+# Structured logging configuration.
+#
+# logging:
+  # Minimum emitted log level.
+  #
+  # Default: info
+  #
+  # Supported values:
+  # - debug
+  # - info
+  # - warn
+  # - error
+  #
+  # level: "info"
+
+  # Structured logging output format.
+  #
+  # Default: json
+  #
+  # Supported values:
+  # - json
+  # - text
+  #
+  # JSON is recommended for production and centralized log collection.
+  #
+  # format: "json"
+
+
+# HTTP server configuration.
+#
+# server:
+  # Address on which the HTTP server listens.
+  #
+  # Default: 0.0.0.0
+  #
+  # host: "0.0.0.0"
+
+  # TCP port on which the HTTP server listens.
+  #
+  # Default: 8080
+  # Valid range: 1-65535.
+  #
+  # port: 8080
+
+  # Maximum time allowed to read the complete HTTP request.
+  #
+  # Default: 5s
+  #
+  # read_timeout: 5s
+
+  # Maximum time allowed to read HTTP request headers.
+  #
+  # Default: 5s
+  #
+  # A bounded header timeout helps protect the server from slow clients.
+  #
+  # read_header_timeout: 5s
+
+  # Maximum time allowed to write an HTTP response.
+  #
+  # Default: 5s
+  #
+  # write_timeout: 5s
+
+  # Maximum time an idle keep-alive connection may remain open.
+  #
+  # Default: 60s
+  #
+  # idle_timeout: 60s
+
+  # Maximum time allowed for graceful server shutdown.
+  #
+  # Default: 10s
+  #
+  # shutdown_timeout: 10s
+
+  # Maximum accepted HTTP request-header size in bytes.
+  #
+  # Default: 1048576 (1 MiB)
+  #
+  # max_header_bytes: 1048576

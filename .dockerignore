@@ -1,0 +1,29 @@
+# Build artifacts
+bin/
+dist/
+server
+cli
+
+# Editor / OS
+.git
+.gitignore
+.DS_Store
+.idea/
+.vscode/
+.devcontainer/
+
+# Secrets: never copy real key material into images.
+secrets/*
+!secrets/.gitkeep
+*.pem
+*.key
+config/config.local.yaml
+config/config.dev.yaml
+
+# Integration test scratch
+tests/integration/.scratch/
+
+# Documentation
+README.md
+AGENTS.md
+LICENSE

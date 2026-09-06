@@ -1,0 +1,64 @@
+# Dockerfile.test builds the production-like application image used by the
+# integration tests. It mirrors the production Dockerfile (same Go version,
+# build flags, runtime base, user model, filesystem layout, and health
+# contract) and ships both binaries so the tests exercise the full project
+# artifact. No private signing material is baked into this image.
+#
+# Unlike the production Dockerfile, the build stage does not pin
+# --platform=$BUILDPLATFORM and does not use RUN --mount=type=cache: the
+# test image is only ever built and used on the local daemon, and
+# Testcontainers API builds go through the legacy build path where
+# BuildKit-only features are unavailable. The resulting binaries are
+# identical to the production build for the local platform.
+
+FROM golang:1.27-alpine AS build
+
+WORKDIR /src
+
+ARG TARGETOS
+ARG TARGETARCH
+
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    go build \
+    -mod=readonly \
+    -trimpath \
+    -ldflags="-s -w" \
+    -o /out/server \
+    ./cmd/server \
+    && CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    go build \
+    -mod=readonly \
+    -trimpath \
+    -ldflags="-s -w" \
+    -o /out/cli \
+    ./cmd/cli
+
+
+FROM alpine:3.24 AS runtime
+
+RUN apk add --no-cache ca-certificates \
+    && addgroup -S -g 10001 app \
+    && adduser -S -D -H -u 10001 -G app app
+
+WORKDIR /app
+
+USER app
+
+
+# Test target: production-like runtime shipping both binaries so
+# integration tests validate a realistic project artifact while still
+# containing the CLI. No secret material is baked in.
+FROM runtime AS test
+
+COPY --from=build --chown=app:app /out/server /app/server
+COPY --from=build --chown=app:app /out/cli /app/cli
+
+EXPOSE 8080
+
+ENTRYPOINT ["/app/server"]
