@@ -36,6 +36,11 @@ reverse-proxy infrastructure.
 
 ## Quick start
 
+> [!WARNING]
+> `simple-jwt-authenticator` is under active development.
+> Configuration and behavior may change between releases.
+> Review the release notes carefully before updating.
+
 Create directories for the server configuration and JWT verification
 key:
 
