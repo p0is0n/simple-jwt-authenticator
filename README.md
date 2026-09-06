@@ -1,4 +1,4 @@
-# simple-jwt-authenticator
+# Simple JWT Authenticator
 
 [![Test](https://github.com/p0is0n/simple-jwt-authenticator/actions/workflows/test.yml/badge.svg)](https://github.com/p0is0n/simple-jwt-authenticator/actions/workflows/test.yml) [![Deploy](https://github.com/p0is0n/simple-jwt-authenticator/actions/workflows/deploy.yml/badge.svg)](https://github.com/p0is0n/simple-jwt-authenticator/actions/workflows/deploy.yml)
 
@@ -560,6 +560,106 @@ Consequently, malformed authentication input that produces
 `400 Bad Request` when calling the authenticator directly is normally
 treated by Nginx as an authentication-subrequest error rather than being
 converted into an ordinary credential failure.
+
+## CLI
+
+`simple-jwt-authenticator` includes a command-line interface for working
+with configuration and JWT tokens without running the authentication
+server.
+
+The CLI is distributed as a separate container image:
+
+```text
+ghcr.io/p0is0n/simple-jwt-authenticator-cli
+```
+
+```sh
+docker run --rm \
+  ghcr.io/p0is0n/simple-jwt-authenticator-cli:latest \
+  --help
+```
+
+For example:
+
+```sh
+docker run --rm \
+  ghcr.io/p0is0n/simple-jwt-authenticator-cli:latest \
+  token generate --help
+```
+
+and:
+
+```sh
+docker run --rm \
+  ghcr.io/p0is0n/simple-jwt-authenticator-cli:latest \
+  token validate --help
+```
+
+### Generate a token
+
+The CLI can generate RS256 JWTs using a configured private signing key:
+
+```sh
+docker run --rm \
+  -v "$(pwd)/config/cli.yaml:/config/cli.yaml:ro" \
+  -v "$(pwd)/secrets:/run/secrets:ro" \
+  ghcr.io/p0is0n/simple-jwt-authenticator-cli:latest \
+  token generate \
+  --config /config/cli.yaml \
+  --subject camera-front \
+  --audience frigate \
+  --ttl 1h
+```
+
+Optional identity claims can also be supplied:
+
+```sh
+docker run --rm \
+  -v "$(pwd)/config/cli.yaml:/config/cli.yaml:ro" \
+  -v "$(pwd)/secrets:/run/secrets:ro" \
+  ghcr.io/p0is0n/simple-jwt-authenticator-cli:latest \
+  token generate \
+  --config /config/cli.yaml \
+  --subject camera-front \
+  --audience frigate \
+  --username camera \
+  --email camera@example.com \
+  --ttl 1h
+```
+
+Private signing keys are sensitive material. Mount them only into trusted
+environments that are explicitly responsible for issuing tokens.
+
+### Validate a token
+
+The CLI can verify a token using the same JWT validation rules used by the
+authentication core:
+
+```sh
+docker run --rm \
+  -v "$(pwd)/config/cli.yaml:/config/cli.yaml:ro" \
+  -v "$(pwd)/secrets:/run/secrets:ro" \
+  ghcr.io/p0is0n/simple-jwt-authenticator-cli:latest \
+  token validate \
+  --config /config/cli.yaml \
+  --token "$TOKEN"
+```
+
+A token can also be validated against an additional claim expression:
+
+```sh
+docker run --rm \
+  -v "$(pwd)/config/cli.yaml:/config/cli.yaml:ro" \
+  -v "$(pwd)/secrets:/run/secrets:ro" \
+  ghcr.io/p0is0n/simple-jwt-authenticator-cli:latest \
+  token validate \
+  --config /config/cli.yaml \
+  --token "$TOKEN" \
+  --claim-expression 'subject == "camera-front" && audience == "frigate"'
+```
+
+The claim expression is evaluated in addition to the configured JWT
+validation policy. It cannot make an otherwise invalid token valid.
 
 ## License
 

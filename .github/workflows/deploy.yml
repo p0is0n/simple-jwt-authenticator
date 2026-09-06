@@ -22,7 +22,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  GHCR_IMAGE: ghcr.io/${{ github.repository }}
+  GHCR_SERVER_IMAGE: ghcr.io/${{ github.repository }}
+  GHCR_CLI_IMAGE: ghcr.io/${{ github.repository }}-cli
 
 jobs:
   deploy:
@@ -63,7 +64,7 @@ jobs:
           echo "publish=true" >> "${GITHUB_OUTPUT}"
 
       - name: Checkout revision
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ steps.context.outputs.sha }}
           fetch-depth: 0
@@ -134,13 +135,25 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Extract metadata
+      - name: Extract server metadata
         if: steps.publication.outputs.publish == 'true'
-        id: meta
+        id: server_meta
         uses: docker/metadata-action@v6
         with:
           images: |
-            ${{ env.GHCR_IMAGE }}
+            ${{ env.GHCR_SERVER_IMAGE }}
+          tags: |
+            type=raw,value=main,enable=${{ steps.publication.outputs.main == 'true' }}
+            type=raw,value=${{ steps.publication.outputs.version }},enable=${{ steps.publication.outputs.release == 'true' }}
+            type=raw,value=latest,enable=${{ steps.publication.outputs.release == 'true' }}
+
+      - name: Extract CLI metadata
+        if: steps.publication.outputs.publish == 'true'
+        id: cli_meta
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ${{ env.GHCR_CLI_IMAGE }}
           tags: |
             type=raw,value=main,enable=${{ steps.publication.outputs.main == 'true' }}
             type=raw,value=${{ steps.publication.outputs.version }},enable=${{ steps.publication.outputs.release == 'true' }}
@@ -154,7 +167,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & Push
+      - name: Build & Push server
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -163,8 +176,26 @@ jobs:
             linux/amd64
             linux/arm64
           push: ${{ steps.publication.outputs.publish == 'true' }}
-          tags: ${{ steps.publication.outputs.publish == 'true' && steps.meta.outputs.tags || '' }}
-          labels: ${{ steps.publication.outputs.publish == 'true' && steps.meta.outputs.labels || '' }}
+          tags: ${{ steps.publication.outputs.publish == 'true' && steps.server_meta.outputs.tags || '' }}
+          labels: ${{ steps.publication.outputs.publish == 'true' && steps.server_meta.outputs.labels || '' }}
+          build-args: |
+            VERSION=${{ steps.build.outputs.version }}
+            COMMIT=${{ steps.build.outputs.commit }}
+            BUILD_DATE=${{ steps.build.outputs.date }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=min
+
+      - name: Build & Push CLI
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: cli
+          platforms: |
+            linux/amd64
+            linux/arm64
+          push: ${{ steps.publication.outputs.publish == 'true' }}
+          tags: ${{ steps.publication.outputs.publish == 'true' && steps.cli_meta.outputs.tags || '' }}
+          labels: ${{ steps.publication.outputs.publish == 'true' && steps.cli_meta.outputs.labels || '' }}
           build-args: |
             VERSION=${{ steps.build.outputs.version }}
             COMMIT=${{ steps.build.outputs.commit }}
