@@ -23,9 +23,9 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     -mod=readonly \
     -trimpath \
     -ldflags="-s -w \
-        -X simple-jwt-authenticator/internal/buildinfo.Version=${VERSION} \
-        -X simple-jwt-authenticator/internal/buildinfo.Commit=${COMMIT} \
-        -X simple-jwt-authenticator/internal/buildinfo.Date=${BUILD_DATE}" \
+        -X simple-jwt-authenticator/internal/buildinfo.version=${VERSION} \
+        -X simple-jwt-authenticator/internal/buildinfo.commit=${COMMIT} \
+        -X simple-jwt-authenticator/internal/buildinfo.date=${BUILD_DATE}" \
     -o /out/server \
     ./cmd/server \
     && CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
@@ -33,9 +33,9 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     -mod=readonly \
     -trimpath \
     -ldflags="-s -w \
-        -X simple-jwt-authenticator/internal/buildinfo.Version=${VERSION} \
-        -X simple-jwt-authenticator/internal/buildinfo.Commit=${COMMIT} \
-        -X simple-jwt-authenticator/internal/buildinfo.Date=${BUILD_DATE}" \
+        -X simple-jwt-authenticator/internal/buildinfo.version=${VERSION} \
+        -X simple-jwt-authenticator/internal/buildinfo.commit=${COMMIT} \
+        -X simple-jwt-authenticator/internal/buildinfo.date=${BUILD_DATE}" \
     -o /out/cli \
     ./cmd/cli
 

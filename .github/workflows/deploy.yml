@@ -108,6 +108,26 @@ jobs:
           echo "release=true" >> "${GITHUB_OUTPUT}"
           echo "version=${REF_NAME#v}" >> "${GITHUB_OUTPUT}"
 
+      - name: Resolve build metadata
+        id: build
+        shell: bash
+        env:
+          RELEASE: ${{ steps.publication.outputs.release }}
+          RELEASE_VERSION: ${{ steps.publication.outputs.version }}
+          HEAD_SHA: ${{ steps.context.outputs.sha }}
+        run: |
+          set -euo pipefail
+
+          version="dev"
+
+          if [[ "${RELEASE}" == "true" ]]; then
+            version="${RELEASE_VERSION}"
+          fi
+
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "commit=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
+          echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "${GITHUB_OUTPUT}"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
 
@@ -145,5 +165,9 @@ jobs:
           push: ${{ steps.publication.outputs.publish == 'true' }}
           tags: ${{ steps.publication.outputs.publish == 'true' && steps.meta.outputs.tags || '' }}
           labels: ${{ steps.publication.outputs.publish == 'true' && steps.meta.outputs.labels || '' }}
+          build-args: |
+            VERSION=${{ steps.build.outputs.version }}
+            COMMIT=${{ steps.build.outputs.commit }}
+            BUILD_DATE=${{ steps.build.outputs.date }}
           cache-from: type=gha
           cache-to: type=gha,mode=min
