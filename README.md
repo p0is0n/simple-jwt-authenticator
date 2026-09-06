@@ -1,5 +1,7 @@
 # simple-jwt-authenticator
 
+[![Test](https://github.com/p0is0n/simple-jwt-authenticator/actions/workflows/test.yml/badge.svg)](https://github.com/p0is0n/simple-jwt-authenticator/actions/workflows/test.yml) [![Deploy](https://github.com/p0is0n/simple-jwt-authenticator/actions/workflows/deploy.yml/badge.svg)](https://github.com/p0is0n/simple-jwt-authenticator/actions/workflows/deploy.yml)
+
 A lightweight, security-focused JWT authentication service for reverse
 proxies and trusted HTTP infrastructure.
 
