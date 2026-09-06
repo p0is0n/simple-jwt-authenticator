@@ -108,7 +108,7 @@ Create `config/server.yaml`:
 
 ``` sh
 cat > config/server.yaml <<'EOF'
-authentication:
+auth:
   handlers:
     http:
       nginx:
@@ -129,8 +129,6 @@ jwt:
   issuer: "home-auth"
   audience:
     - "internal-services"
-  default_ttl: 1h
-  max_ttl: 168h
   clock_skew: 30s
 
 metrics:
